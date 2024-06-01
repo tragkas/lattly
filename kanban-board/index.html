@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Favicon and Stylesheet -->
+<link rel="icon" href="../assets/asset-display/icon.png">
+
+
+<!-- General Meta Tags -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KanbanBoard - Visual Task Management</title>
+<meta name="description" content="Efficiently manage tasks with KanbanBoard, a visual task management app using the Kanban method for enhanced productivity.">
+<meta name="author" content="KanbanBoard">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://lattly/kanban-board/index.html">
+
+<!-- Open Graph (OG) Meta Tags -->
+<meta property="og:site_name" content="KanbanBoard">
+<meta property="og:title" content="KanbanBoard - Visual Task Management">
+<meta property="og:description" content="Efficiently manage tasks with KanbanBoard, a visual task management app using the Kanban method for enhanced productivity.">
+<meta property="og:image" content="assets/asset-display/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:title" content="KanbanBoard - Visual Task Management">
+<meta name="twitter:description" content="Efficiently manage tasks with KanbanBoard, a visual task management app using the Kanban method for enhanced productivity.">
+<meta name="twitter:image" content="assets/asset-display/og-image.png">
+
+<!-- X Card Meta Tags -->
+<meta name="x:title" content="KanbanBoard - Visual Task Management">
+<meta name="x:description" content="Efficiently manage tasks with KanbanBoard, a visual task management app using the Kanban method for enhanced productivity.">
+<meta name="x:image" content="assets/asset-display/og-image.png">
+
+
+  <style>
+:root {
+  --background-color: #000000;
+  --text-color: #0B0B0B;
+  --column-bg-color: #B8B8B8;
+  --box-shadow-color: 0 5px 10px rgba(0, 0, 0, 0.1);
+  --input-border-color: #ccc;
+  --task-bg-color: #f2f2f2;
+  --task-hover-bg-color: #f2f2f2;
+  --input-bg-color: #f2f2f2;
+  --button-bg-color: #ccc;
+  --button-text-color: #fff;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  background-image: url('../assets/asset-display/back.png');
+}
+
+.column {
+  flex: 1;
+  margin: 20px;
+  padding: 20px;
+  background-color: var(--column-bg-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--box-shadow-color);
+  color: var(--text-color);
+}
+
+.column-header {
+  font-size: 1.6em;
+  margin-bottom: 10px;
+}
+
+.task {
+  background-color: var(--task-bg-color);
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: grab;
+}
+
+.task:hover {
+  background-color: var(--task-hover-bg-color);
+}
+
+.task input {
+  width: calc(100% - 22px);
+  border: none;
+  background: none;
+  font-size: 1em;
+  margin-right: 10px;
+  color: var(--text-color);
+}
+
+.edit-button,
+.delete-button {
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  border: none;
+  padding: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.edit-button:hover,
+.delete-button:hover {
+  background-color: var(--background-color);
+}
+
+input[type="text"] {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--input-border-color);
+  border-radius: 8px;
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
+}
+
+    /* Media Queries */
+    @media screen and (max-width: 768px) {
+      .column {
+        flex: 100%;
+      }
+    }
+
+    a {
+      color: white;
+    }
+
+        #floating-frame {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            z-index: 9999;
+        }
+  </style>
+</head>
+<body>
+
+<div id="to-do" class="column" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <h2 class="column-header">To Do</h2>
+  <div id="to-do-tasks"></div>
+  <input type="text" id="to-do-input" placeholder="Add your new task" onkeydown="addTask(event, 'to-do')">
+</div>
+
+<div id="in-progress" class="column" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <h2 class="column-header">In Progress</h2>
+  <div id="in-progress-tasks"></div>
+  <input type="text" id="in-progress-input" placeholder="Add your new task" onkeydown="addTask(event, 'in-progress')">
+</div>
+
+<div id="done" class="column" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <h2 class="column-header">Done</h2>
+  <div id="done-tasks"></div>
+  <input type="text" id="done-input" placeholder="Add your new task" onkeydown="addTask(event, 'done')">
+</div>
+
+<div id="floating-frame">
+  <a href="../index.html">Press for back and F11 for full screen  </a>
+</div>
+
+<script>
+  function allowDrop(event) {
+    event.preventDefault();
+  }
+
+  function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+  }
+
+  function drop(event) {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text");
+    const draggedTask = document.getElementById(data);
+    const targetColumnId = event.target.closest('.column').id;
+    const targetTasksContainer = document.getElementById(`${targetColumnId}-tasks`);
+    targetTasksContainer.appendChild(draggedTask);
+    saveTasks(); // Save tasks when dropped
+  }
+
+  function addTask(event, columnId) {
+    if (event.key === 'Enter') {
+      const taskContent = event.target.value.trim();
+      if (taskContent) {
+        const task = createTask(taskContent);
+        document.getElementById(`${columnId}-tasks`).appendChild(task);
+        event.target.value = ''; // Clear the input box after adding the task
+        saveTasks();
+      }
+    }
+  }
+
+  function createTask(taskContent) {
+    const task = document.createElement("div");
+    const taskId = `task-${Date.now()}`;
+    task.id = taskId;
+    task.className = "task";
+    task.draggable = true;
+    task.addEventListener("dragstart", drag);
+    task.innerHTML = `<input type="text" value="${taskContent}" readonly>
+                      <button class="edit-button" onclick="editTask('${taskId}')">Edit</button>
+                      <button class="delete-button" onclick="deleteTask('${taskId}')">Delete</button>`;
+    return task;
+  }
+
+  function editTask(taskId) {
+    const taskInput = document.getElementById(taskId).querySelector("input");
+    taskInput.readOnly = !taskInput.readOnly;
+    saveTasks();
+  }
+
+  function deleteTask(taskId) {
+    const task = document.getElementById(taskId);
+    task.parentNode.removeChild(task);
+    saveTasks();
+  }
+
+  function saveTasks() {
+    ["to-do", "in-progress", "done"].forEach(columnId => {
+      const columnTasksContainer = document.getElementById(`${columnId}-tasks`);
+      const columnTasks = Array.from(columnTasksContainer.children).map(task => task.querySelector("input").value);
+      localStorage.setItem(`${columnId}-tasks`, JSON.stringify(columnTasks));
+    });
+  }
+
+  // Restore tasks from local storage on page load
+  window.onload = function () {
+    ["to-do", "in-progress", "done"].forEach(columnId => {
+      const columnTasks = JSON.parse(localStorage.getItem(`${columnId}-tasks`)) || [];
+      const columnTasksContainer = document.getElementById(`${columnId}-tasks`);
+      columnTasks.forEach(taskContent => {
+        const task = createTask(taskContent);
+        columnTasksContainer.appendChild(task);
+      });
+    });
+  }
+</script>
+
+    <script>
+        document.addEventListener('keydown', function(event) {
+            // Check if the combination ctrl + B is pressed
+            if (event.key === 'b' && event.ctrlKey || event.key === 'B' && event.ctrlKey) {
+                window.location.href = '../index.html'; // Redirect to index.html
+            }
+
+            // Check if F11 key is pressed for full screen
+            if (event.key === 'F11') {
+                toggleFullScreen();
+            }
+        });
+
+        // Function to toggle full screen mode
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+<!-- Favicon and Stylesheet -->
+<link rel="icon" href="../assets/asset-display/icon.png">
+
+
+<!-- General Meta Tags -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlipClock - Aesthetic & Minimal Timekeeping</title>
+<meta name="description" content="Aesthetic moments with FlipClock, enjoying your coffee, studying, or working on your projects.">
+<meta name="author" content="FlipClock">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://lattly/flipclock/index.html">
+
+<!-- Open Graph (OG) Meta Tags -->
+<meta property="og:site_name" content="FlipClock">
+<meta property="og:title" content="FlipClock - Aesthetic & Minimal Timekeeping">
+<meta property="og:description" content="Aesthetic moments with FlipClock, enjoying your coffee, studying, or working on your projects.">
+<meta property="og:image" content="assets/asset-display/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:title" content="FlipClock - Aesthetic & Minimal Timekeeping">
+<meta name="twitter:description" content="Aesthetic moments with FlipClock, enjoying your coffee, studying, or working on your projects.">
+<meta name="twitter:image" content="assets/asset-display/og-image.png">
+
+<!-- X Card Meta Tags -->
+<meta name="x:title" content="FlipClock - Aesthetic & Minimal Timekeeping">
+<meta name="x:description" content="Aesthetic moments with FlipClock, enjoying your coffee, studying, or working on your projects.">
+<meta name="x:image" content="assets/asset-display/og-image.png">
+
+
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #000;
+    }
+
+    #clock {
+      font-family: 'Arial', sans-serif;
+      color: #B8B8B8;
+      display: flex;
+      font-size: 12vw; /* Adjust the font size based on the screen width */
+    }
+
+    .digit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 24px; /* Adjust the margin based on the screen width */
+    }
+
+    .card {
+      width: 40vw; /* Adjust the width for the cards based on the screen width */
+      height: 40vw; /* Maintain a square aspect ratio */
+      line-height: 40vw; /* Maintain a square aspect ratio */
+      text-align: center;
+      font-size: 30vw; /* Adjust the font size for the cards based on the screen width */
+      font-weight: bold;
+      background-color: #0B0B0B;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card .card-front,
+    .card .card-back {
+      display: none;
+    }
+
+    a {
+      color: white;
+    }
+
+    .digit.show .card-front {
+      display: block;
+    }
+
+        #floating-frame {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            z-index: 9999;
+        }
+  </style>
+</head>
+<body>
+  <div id="clock">
+    <div class="digit" id="hours">
+      <div class="card">
+        <div class="card-face card-front">0</div>
+      </div>
+    </div>
+    
+    <div class="digit" id="minutes">
+      <div class="card">
+        <div class="card-face card-front">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="floating-frame">
+    <a href="../index.html">Press for back and F11 for full screen  </a>
+</div>
+
+<script>
+  function updateClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+
+    updateDigit("hours", hours);
+    updateDigit("minutes", minutes);
+  }
+
+  function updateDigit(digitId, value) {
+    const digit = document.getElementById(digitId);
+    const cardFront = digit.querySelector(".card-front");
+
+    // Check if the value has changed
+    if (cardFront.textContent !== value) {
+      digit.classList.remove("show");
+      setTimeout(() => {
+        cardFront.textContent = value;
+        digit.classList.add("show");
+      }, 100);
+    }
+  }
+
+  // Call updateClock immediately
+  updateClock();
+
+  // Update the clock every second (1000 milliseconds)
+  setInterval(updateClock, 1000);
+</script>
+
+    <script>
+        document.addEventListener('keydown', function(event) {
+            // Check if the combination ctrl + B is pressed
+            if (event.key === 'b' && event.ctrlKey || event.key === 'B' && event.ctrlKey) {
+                window.location.href = '../index.html'; // Redirect to index.html
+            }
+
+            // Check if F11 key is pressed for full screen
+            if (event.key === 'F11') {
+                toggleFullScreen();
+            }
+        });
+
+        // Function to toggle full screen mode
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

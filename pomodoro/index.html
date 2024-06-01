@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Favicon and Stylesheet -->
+    <link rel="icon" href="../assets/asset-display/icon.png">
+
+    <!-- General Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PomodoroClock - Focus & Productivity Timer</title>
+    <meta name="description" content="Boost your productivity with PomodoroClock, a focus and work timer for efficient task management.">
+    <meta name="author" content="PomodoroClock">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://lattly/pomodoro/index.html">
+
+    <!-- Open Graph (OG) Meta Tags -->
+    <meta property="og:site_name" content="PomodoroClock">
+    <meta property="og:title" content="PomodoroClock - Focus & Productivity Timer">
+    <meta property="og:description" content="Boost your productivity with PomodoroClock, a focus and work timer for efficient task management.">
+    <meta property="og:image" content="assets/asset-display/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:title" content="PomodoroClock - Focus & Productivity Timer">
+    <meta name="twitter:description" content="Boost your productivity with PomodoroClock, a focus and work timer for efficient task management.">
+    <meta name="twitter:image" content="assets/asset-display/og-image.png">
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: #B8B8B8;
+            font-family: Arial, sans-serif;
+        }
+
+        #timer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #clock {
+            display: flex;
+            font-size: 15vw;
+        }
+
+        .digit {
+            margin: 0 10px;
+        }
+
+        .card {
+            width: 20vw;
+            height: 20vw;
+            line-height: 15vw;
+            text-align: center;
+            font-size: 10vw;
+            font-weight: bold;
+            background-color: #0B0B0B;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .card .card-front {
+            display: flex;
+        }
+
+        .digit.show .card-front {
+            display: flex;
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #0B0B0B;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #000;
+        }
+
+        #settings-icon {
+            font-size: 2em;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #settings-section {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #settings-section input {
+            margin: 5px;
+            padding: 8px;
+            width: 80%;
+            box-sizing: border-box;
+        }
+
+        #save-btn {
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        a {
+            color: white;
+        }
+
+        #floating-frame {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            z-index: 9999;
+        }
+
+        @media (max-width: 600px) {
+            #clock {
+                font-size: 20vw;
+            }
+
+            .card {
+                width: 25vw;
+                height: 25vw;
+                line-height: 25vw;
+                font-size: 20vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="timer-container">
+        <div id="clock">
+            <div class="digit" id="minuteDigit">
+                <div class="card">
+                    <div class="card-face card-front"></div>
+                </div>
+            </div>
+            <div class="digit">:</div>
+            <div class="digit" id="secondDigit">
+                <div class="card">
+                    <div class="card-face card-front"></div>
+                </div>
+            </div>
+        </div>
+        <div id="settings-icon">⚙️</div>
+        <div id="settings-section">
+            <input type="number" id="pomodoro-duration" placeholder="Pomodoro Duration (min)" min="1" max="60">
+            <input type="number" id="break-duration" placeholder="Break Duration (min)" min="1">
+            <br>
+            <button id="save-btn">Save</button>
+        </div>
+        <div id="controls">
+            <button id="startPauseBtn">Start</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+    </div>
+
+    <div id="floating-frame">
+        <a href="../index.html">Press for back and F11 for full screen</a>
+    </div>
+
+<script>
+    const pomodoroDurationInput = document.getElementById('pomodoro-duration');
+    const breakDurationInput = document.getElementById('break-duration');
+    const settingsIcon = document.getElementById('settings-icon');
+    const settingsSection = document.getElementById('settings-section');
+    const saveBtn = document.getElementById('save-btn');
+    const startPauseBtn = document.getElementById('startPauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let pomodoroDuration = 25 * 60;
+    let breakDuration = 5 * 60;
+    let isTimerRunning = false;
+    let timerInterval;
+
+    function updateDisplay(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        updateDigitDisplay(document.getElementById('minuteDigit'), minutes);
+        updateDigitDisplay(document.getElementById('secondDigit'), seconds);
+    }
+
+    function updateDigitDisplay(digitElement, value) {
+        const card = digitElement.querySelector('.card');
+        const cardFront = card.querySelector('.card-front');
+        const formattedValue = value < 10 ? '0' + value : value.toString();
+        if (digitElement.dataset.value !== formattedValue) {
+            cardFront.textContent = formattedValue;
+            digitElement.dataset.value = formattedValue;
+            digitElement.classList.add('show');
+        }
+    }
+
+    function startPauseTimer() {
+        if (!isTimerRunning) {
+            startTimer();
+        } else {
+            pauseTimer();
+        }
+    }
+
+    function startTimer() {
+        isTimerRunning = true;
+        startPauseBtn.textContent = 'Pause';
+        timerInterval = setInterval(() => {
+            if (pomodoroDuration <= 0) {
+                clearInterval(timerInterval);
+                playSound();
+                startBreak();
+            } else {
+                updateDisplay(pomodoroDuration);
+                pomodoroDuration--;
+            }
+        }, 1000);
+    }
+
+    function startBreak() {
+        timerInterval = setInterval(() => {
+            if (breakDuration <= 0) {
+                clearInterval(timerInterval);
+                playSound();
+                resetTimer();
+            } else {
+                updateDisplay(breakDuration);
+                breakDuration--;
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        isTimerRunning = false;
+        startPauseBtn.textContent = 'Resume';
+        clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+        isTimerRunning = false;
+        startPauseBtn.textContent = 'Start';
+        clearInterval(timerInterval);
+        pomodoroDuration = parseInt(pomodoroDurationInput.value) * 60 || 25 * 60;
+        breakDuration = parseInt(breakDurationInput.value) * 60 || 5 * 60;
+        updateDisplay(pomodoroDuration);
+    }
+
+    function showSettings() {
+        settingsSection.style.display = 'block';
+        settingsIcon.style.display = 'none';
+    }
+
+    function saveSettings() {
+        pomodoroDuration = parseInt(pomodoroDurationInput.value) * 60 || 25 * 60;
+        breakDuration = parseInt(breakDurationInput.value) * 60 || 5 * 60;
+        updateDisplay(pomodoroDuration);
+        hideSettings();
+    }
+
+    function hideSettings() {
+        settingsSection.style.display = 'none';
+        settingsIcon.style.display = 'block';
+    }
+
+    function playSound() {
+        const audio = new Audio('../assets/asset-display/sound.wav');
+        audio.play();
+    }
+
+    startPauseBtn.addEventListener('click', startPauseTimer);
+    resetBtn.addEventListener('click', resetTimer);
+    settingsIcon.addEventListener('click', showSettings);
+    saveBtn.addEventListener('click', saveSettings);
+
+    updateDisplay(pomodoroDuration);
+
+    document.addEventListener('keydown', (event) => {
+        if ((event.key === 'b' && event.ctrlKey) || (event.key === 'B' && event.ctrlKey)) {
+            window.location.href = '../index.html';
+        }
+        if (event.key === 'F11') {
+            toggleFullScreen();
+        }
+    });
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+</script>
+</body>
+</html>
